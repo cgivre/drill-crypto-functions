@@ -13,7 +13,7 @@ Usage:
 +-----------------------------------+
 ```
 * **`sha(<text>`) / `sha1(<text>)`**: Calculates an SHA-1 160-bit checksum for the string, as described in RFC 3174 (Secure Hash Algorithm). (https://en.wikipedia.org/wiki/SHA-1)  The value is returned as a string of 40 hexadecimal digits, or NULL if the argument was NULL. Note that `sha()` and `sha1()` are aliases for the same function. 
-```sq1
+```sql
 > select sha1( 'testing' ) from (VALUES(1));
 +-------------------------------------------+
 |                  EXPR$0                   |

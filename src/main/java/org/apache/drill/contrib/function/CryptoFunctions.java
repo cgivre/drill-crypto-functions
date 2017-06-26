@@ -138,6 +138,88 @@ public class CryptoFunctions{
     }
 
     @FunctionTemplate(
+        name = "aes_encrypt",
+        scope = FunctionTemplate.FunctionScope.SIMPLE,
+        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
+    )
+    public static class AESEncryptFunction implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder raw_input;
+
+        @Param
+        VarCharHolder raw_key;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        @Workspace
+        String key;
+
+        public void setup() {
+            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_key.start, raw_key.end, raw_key.buffer);
+        }
+
+
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+
+            String encrypted_text = org.apache.drill.contrib.function.AES.encrypt( input, key );
+
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = encrypted_text.getBytes().length;
+            buffer.setBytes(0, encrypted_text.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(
+        name = "aes_decrypt",
+        scope = FunctionTemplate.FunctionScope.SIMPLE,
+        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
+    )
+    public static class AESDecryptFunction implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder raw_input;
+
+        @Param
+        VarCharHolder raw_key;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        @Workspace
+        String key;
+
+        public void setup() {
+            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_key.start, raw_key.end, raw_key.buffer);
+        }
+
+
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+
+            String decrypted_text = org.apache.drill.contrib.function.AES.decrypt( input, key );
+
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = decrypted_text.getBytes().length;
+            buffer.setBytes(0, decrypted_text.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(
         name = "des_encrypt",
         scope = FunctionTemplate.FunctionScope.SIMPLE,
         nulls = FunctionTemplate.NullHandling.NULL_IF_NULL

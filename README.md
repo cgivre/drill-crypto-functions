@@ -2,6 +2,26 @@
 
 This library contains a collection of cryptography-related functions for Apache Drill. It generally mirrors the crypto functions in MySQL.  The package includes:
 
+
+* **`aes_encrypt()`/ `aes_decrypt()`**: implement encryption and decryption of data using the official AES (Advanced Encryption Standard) algorithm, previously known as “Rijndael.”
+ `AES_ENCRYPT()` encrypts the string `str` using the key string `key_str` and returns a binary string containing the encrypted output. `AES_DECRYPT()` decrypts the encrypted string `crypt_str` using the key string `key_str` and returns the original cleartext string. If either function argument is NULL, the function returns NULL.
+
+```sql
+> SELECT aes_encrypt( 'encrypted_text', 'my_secret_key' ) AS aes FROM (VALUES(1));
++---------------------------+
+|            aes            |
++---------------------------+
+| JkcBUNAn8ByKWCcVmNrKMA==  |
++---------------------------+
+
+ SELECT aes_encrypt( 'encrypted_text', 'my_secret_key' ) AS encrypted, aes_decrypt(aes_encrypt( 'encrypted_text', 'my_secret_key' ),'my_secret_key') AS decrypted FROM (VALUES(1));
++---------------------------+-----------------+
+|         encrypted         |    decrypted    |
++---------------------------+-----------------+
+| JkcBUNAn8ByKWCcVmNrKMA==  | encrypted_text  |
++---------------------------+-----------------+
+```
+
 * **`md5(<text>)`**:  Returns the md5 hash of the text. (https://en.wikipedia.org/wiki/MD5)
 Usage:
 ```sql

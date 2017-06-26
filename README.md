@@ -21,6 +21,15 @@ Usage:
 | dc724af18fbdd4e59189f5fe768a5f8311527050  |
 +-------------------------------------------+
 ```
+* **`sha2(<text>`) / `sha256(<text>)`**: Calculates an SHA-2 256-bit checksum for the string. (https://en.wikipedia.org/wiki/SHA-2)  The value is returned as a string of hexadecimal digits, or NULL if the argument was NULL. Note that `sha2()` and `sha256()` are aliases for the same function. 
+```sql
+> select sha2( 'testing' ) from (VALUES(1));
++-------------------------------------------------------------------+
+|                              EXPR$0                               |
++-------------------------------------------------------------------+
+| cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90  |
++-------------------------------------------------------------------+
+```
 
 ## Installing These Functions
 This collection of functions does not have any dependencies that are not already included in Drill.  You can build the functions from source by cloning this repository, navigating to the directory and typing: 

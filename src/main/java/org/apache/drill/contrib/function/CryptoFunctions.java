@@ -103,6 +103,41 @@ public class CryptoFunctions{
     }
 
     @FunctionTemplate(
+        names = {"sha256", "sha2"},
+        scope = FunctionTemplate.FunctionScope.SIMPLE,
+        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
+    )
+    public static class sha256Function implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder raw_input;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        public void setup() {
+
+        }
+
+
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+
+            String sha2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex(input);
+
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = sha2.getBytes().length;
+            buffer.setBytes(0, sha2.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(
         name = "des_encrypt",
         scope = FunctionTemplate.FunctionScope.SIMPLE,
         nulls = FunctionTemplate.NullHandling.NULL_IF_NULL

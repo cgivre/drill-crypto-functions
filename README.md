@@ -1,5 +1,7 @@
 # Drill Crypto Functions
 
+** NOTE:  This library is not done... More algorithms to come **
+
 This library contains a collection of cryptography-related functions for Apache Drill. It generally mirrors the crypto functions in MySQL.  The package includes:
 
 * **`md5(<text>)`**:  Returns the md5 hash of the text. (https://en.wikipedia.org/wiki/MD5)

@@ -16,7 +16,9 @@ This library contains a collection of cryptography-related functions for Apache 
 | JkcBUNAn8ByKWCcVmNrKMA==  |
 +---------------------------+
 
- SELECT aes_encrypt( 'encrypted_text', 'my_secret_key' ) AS encrypted, aes_decrypt(aes_encrypt( 'encrypted_text', 'my_secret_key' ),'my_secret_key') AS decrypted FROM (VALUES(1));
+ > SELECT aes_encrypt( 'encrypted_text', 'my_secret_key' ) AS encrypted,
+ aes_decrypt(aes_encrypt( 'encrypted_text', 'my_secret_key' ),'my_secret_key') AS decrypted 
+ FROM (VALUES(1));
 +---------------------------+-----------------+
 |         encrypted         |    decrypted    |
 +---------------------------+-----------------+

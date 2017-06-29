@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.contrib.function;
+package org.apache.drill.exec.fn.impl;
 
 import io.netty.buffer.DrillBuf;
 import org.apache.drill.exec.expr.DrillSimpleFunc;
@@ -53,6 +53,7 @@ public class CryptoFunctions{
         @Workspace
         java.security.MessageDigest md;
 
+        @Override
         public void setup() {
             try {
                 md = java.security.MessageDigest.getInstance("MD5");
@@ -60,7 +61,7 @@ public class CryptoFunctions{
             }
         }
 
-
+        @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
@@ -100,11 +101,12 @@ public class CryptoFunctions{
         @Inject
         DrillBuf buffer;
 
+        @Override
         public void setup() {
 
         }
 
-
+        @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
@@ -135,11 +137,13 @@ public class CryptoFunctions{
         @Inject
         DrillBuf buffer;
 
+
+        @Override
         public void setup() {
 
         }
 
-
+        @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
@@ -150,6 +154,78 @@ public class CryptoFunctions{
             out.start = 0;
             out.end = sha2.getBytes().length;
             buffer.setBytes(0, sha2.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(
+        name = "sha384",
+        scope = FunctionTemplate.FunctionScope.SIMPLE,
+        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
+    )
+    public static class sha384Function implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder raw_input;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        @Override
+        public void setup() {
+
+        }
+
+        @Override
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+
+            String sha384 = org.apache.commons.codec.digest.DigestUtils.sha384Hex(input);
+
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = sha384.getBytes().length;
+            buffer.setBytes(0, sha384.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(
+        name = "sha512",
+        scope = FunctionTemplate.FunctionScope.SIMPLE,
+        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
+    )
+    public static class sha512Function implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder raw_input;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        @Override
+        public void setup() {
+
+        }
+
+        @Override
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+
+            String sha512 = org.apache.commons.codec.digest.DigestUtils.sha512Hex(input);
+
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = sha512.getBytes().length;
+            buffer.setBytes(0, sha512.getBytes());
         }
 
     }
@@ -185,7 +261,7 @@ public class CryptoFunctions{
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
 
-            String encrypted_text = org.apache.drill.contrib.function.AES.encrypt( input, key );
+            String encrypted_text = org.apache.drill.exec.fn.impl.CryptoHelperFunctions.aes_encrypt( input, key );
 
             out.buffer = buffer;
             out.start = 0;
@@ -217,16 +293,17 @@ public class CryptoFunctions{
         @Workspace
         String key;
 
+        @Override
         public void setup() {
             key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_key.start, raw_key.end, raw_key.buffer);
         }
 
-
+        @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
 
-            String decrypted_text = org.apache.drill.contrib.function.AES.decrypt( input, key );
+            String decrypted_text = org.apache.drill.exec.fn.impl.CryptoHelperFunctions.aes_decrypt( input, key );
 
             out.buffer = buffer;
             out.start = 0;

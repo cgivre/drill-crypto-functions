@@ -54,6 +54,7 @@ Usage:
 | cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90  |
 +-------------------------------------------------------------------+
 ```
+Additionally, there are also `sha384(<text>)` and `sha512(<text>)` functions which return SHA-2 hashes with 384 and 512 bit checksums.
 
 ## Installing These Functions
 This collection of functions does not have any dependencies that are not already included in Drill.  You can build the functions from source by cloning this repository, navigating to the directory and typing: 

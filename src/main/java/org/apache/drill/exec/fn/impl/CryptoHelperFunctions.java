@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.contrib.function;
+package org.apache.drill.exec.fn.impl;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +26,7 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-public class AES {
+public class CryptoHelperFunctions {
 
     private static SecretKeySpec secretKey;
     private static byte[] key;
@@ -49,7 +49,7 @@ public class AES {
         }
     }
 
-    public static String encrypt(String strToEncrypt, String secret)
+    public static String aes_encrypt(String strToEncrypt, String secret)
     {
         try
         {
@@ -65,7 +65,7 @@ public class AES {
         return null;
     }
 
-    public static String decrypt(String strToDecrypt, String secret)
+    public static String aes_decrypt(String strToDecrypt, String secret)
     {
         try
         {

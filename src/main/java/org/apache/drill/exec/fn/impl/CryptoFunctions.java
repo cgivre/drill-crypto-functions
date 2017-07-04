@@ -36,16 +36,11 @@ public class CryptoFunctions{
     static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CryptoFunctions.class);
 
     private CryptoFunctions() {}
-
-    @FunctionTemplate(
-        name = "md5",
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
-    public static class md5Function implements DrillSimpleFunc {
+    @FunctionTemplate(name = "md2", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class MD2Function implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Output
         VarCharHolder out;
@@ -58,45 +53,75 @@ public class CryptoFunctions{
 
         @Override
         public void setup() {
-            try {
-                md = java.security.MessageDigest.getInstance("MD5");
-            } catch( Exception e ) {
-            }
         }
 
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
-            byte[] thedigest = null;
-            String output_string = "";
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
+            String outputString = org.apache.commons.codec.digest.DigestUtils.md2Hex(input).toLowerCase();
 
-            try {
-                byte[] bytesOfMessage = input.getBytes("UTF-8");
-                thedigest = md.digest(bytesOfMessage);
-                output_string = String.format("%032X", new java.math.BigInteger(1, thedigest));
-                output_string = output_string.toLowerCase();
-
-            } catch( Exception e ) {
-            }
             out.buffer = buffer;
             out.start = 0;
-            out.end = output_string.getBytes().length;
-            buffer.setBytes(0, output_string.getBytes());
+            out.end = outputString.getBytes().length;
+            buffer.setBytes(0, outputString.getBytes());
+        }
+
+    }
+
+    @FunctionTemplate(name = "md5", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class MD5Function implements DrillSimpleFunc {
+
+        @Param
+        VarCharHolder rawInput;
+
+        @Output
+        VarCharHolder out;
+
+        @Inject
+        DrillBuf buffer;
+
+        @Workspace
+        java.security.MessageDigest md;
+
+        @Override
+        public void setup() {
+            /*try {
+                md = java.security.MessageDigest.getInstance("MD5");
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
+            }*/
+        }
+
+        @Override
+        public void eval() {
+
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
+            String outputString = org.apache.commons.codec.digest.DigestUtils.md5Hex(input).toLowerCase();
+
+            /*try {
+                byte[] bytesOfMessage = input.getBytes("UTF-8");
+                byte[] theDigest = md.digest(bytesOfMessage);
+                outputString = String.format("%032X", new java.math.BigInteger(1, theDigest));
+                outputString = outputString.toLowerCase();
+
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
+            }*/
+            out.buffer = buffer;
+            out.start = 0;
+            out.end = outputString.getBytes().length;
+            buffer.setBytes(0, outputString.getBytes());
         }
 
     }
 
 
-    @FunctionTemplate(
-        names = {"sha", "sha1"},
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
-    public static class sha1Function implements DrillSimpleFunc {
+    @FunctionTemplate(names = {"sha", "sha1"}, scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class SHA1Function implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Output
         VarCharHolder out;
@@ -112,7 +137,7 @@ public class CryptoFunctions{
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
 
             String sha1 = org.apache.commons.codec.digest.DigestUtils.sha1Hex(input);
 
@@ -124,15 +149,11 @@ public class CryptoFunctions{
 
     }
 
-    @FunctionTemplate(
-        names = {"sha256", "sha2"},
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
-    public static class sha256Function implements DrillSimpleFunc {
+    @FunctionTemplate(names = {"sha256", "sha2"}, scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class SHA256Function implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Output
         VarCharHolder out;
@@ -149,7 +170,7 @@ public class CryptoFunctions{
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
 
             String sha2 = org.apache.commons.codec.digest.DigestUtils.sha256Hex(input);
 
@@ -161,15 +182,11 @@ public class CryptoFunctions{
 
     }
 
-    @FunctionTemplate(
-        name = "sha384",
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
-    public static class sha384Function implements DrillSimpleFunc {
+    @FunctionTemplate(name = "sha384", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class SHA384Function implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Output
         VarCharHolder out;
@@ -185,7 +202,7 @@ public class CryptoFunctions{
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
 
             String sha384 = org.apache.commons.codec.digest.DigestUtils.sha384Hex(input);
 
@@ -197,15 +214,11 @@ public class CryptoFunctions{
 
     }
 
-    @FunctionTemplate(
-        name = "sha512",
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
-    public static class sha512Function implements DrillSimpleFunc {
+    @FunctionTemplate(name = "sha512", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
+    public static class SHA512Function implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Output
         VarCharHolder out;
@@ -221,7 +234,7 @@ public class CryptoFunctions{
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
 
             String sha512 = org.apache.commons.codec.digest.DigestUtils.sha512Hex(input);
 
@@ -233,11 +246,7 @@ public class CryptoFunctions{
 
     }
 
-    @FunctionTemplate(
-        name = "aes_encrypt",
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
+    @FunctionTemplate(name = "aes_encrypt", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
     public static class AESEncryptFunction implements DrillSimpleFunc {
 
         @Param
@@ -253,43 +262,35 @@ public class CryptoFunctions{
         DrillBuf buffer;
 
         @Workspace
-        String key;
-
-        @Workspace
-        SecretKeySpec secretKey;
-
-        @Workspace
-        byte[] keyByteArray;
-
-        @Workspace
         Cipher cipher;
 
+        @Override
         public void setup() {
-            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
+            String key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
             java.security.MessageDigest sha = null;
             try {
-                keyByteArray = key.getBytes("UTF-8");
+                byte[] keyByteArray = key.getBytes("UTF-8");
                 sha = java.security.MessageDigest.getInstance("SHA-1");
                 keyByteArray = sha.digest(keyByteArray);
                 keyByteArray = java.util.Arrays.copyOf(keyByteArray, 16);
-                secretKey = new SecretKeySpec(keyByteArray, "AES");
+                SecretKeySpec secretKey = new SecretKeySpec(keyByteArray, "AES");
 
                 cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
             }
         }
 
+        @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
             String encryptedText = "";
             try {
                 encryptedText = javax.xml.bind.DatatypeConverter.printBase64Binary(cipher.doFinal(input.getBytes("UTF-8")));
-            } catch ( Exception e ) {
-
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
             }
 
             out.buffer = buffer;
@@ -300,11 +301,8 @@ public class CryptoFunctions{
 
     }
 
-    @FunctionTemplate(
-        name = "aes_decrypt",
-        scope = FunctionTemplate.FunctionScope.SIMPLE,
-        nulls = FunctionTemplate.NullHandling.NULL_IF_NULL
-    )
+
+    @FunctionTemplate(name = "aes_decrypt", scope = FunctionTemplate.FunctionScope.SIMPLE, nulls = FunctionTemplate.NullHandling.NULL_IF_NULL)
     public static class AESDecryptFunction implements DrillSimpleFunc {
 
         @Param
@@ -320,43 +318,35 @@ public class CryptoFunctions{
         DrillBuf buffer;
 
         @Workspace
-        String key;
-
-        @Workspace
-        SecretKeySpec secretKey;
-
-        @Workspace
-        byte[] keyByteArray;
-
-        @Workspace
         Cipher cipher;
 
+        @Override
         public void setup() {
-            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
+            String key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
             java.security.MessageDigest sha = null;
             try {
-                keyByteArray = key.getBytes("UTF-8");
+                byte[] keyByteArray = key.getBytes("UTF-8");
                 sha = java.security.MessageDigest.getInstance("SHA-1");
                 keyByteArray = sha.digest(keyByteArray);
                 keyByteArray = java.util.Arrays.copyOf(keyByteArray, 16);
-                secretKey = new SecretKeySpec(keyByteArray, "AES");
+                SecretKeySpec secretKey = new SecretKeySpec(keyByteArray, "AES");
 
                 cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
                 cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
             }
         }
+
         @Override
         public void eval() {
 
             String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
             String decryptedText = "";
             try {
-                decryptedText = new String( cipher.doFinal(javax.xml.bind.DatatypeConverter.parseBase64Binary(input)));
-            } catch( Exception e){
-
+                decryptedText = new String(cipher.doFinal(javax.xml.bind.DatatypeConverter.parseBase64Binary(input)));
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
             }
 
             out.buffer = buffer;
@@ -366,7 +356,6 @@ public class CryptoFunctions{
         }
 
     }
-
     @FunctionTemplate(
         name = "des_encrypt",
         scope = FunctionTemplate.FunctionScope.SIMPLE,

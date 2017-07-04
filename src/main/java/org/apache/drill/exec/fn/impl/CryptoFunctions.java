@@ -26,7 +26,10 @@ import org.apache.drill.exec.expr.annotations.Param;
 import org.apache.drill.exec.expr.annotations.Workspace;
 import org.apache.drill.exec.expr.holders.VarCharHolder;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 
 public class CryptoFunctions{
@@ -238,10 +241,10 @@ public class CryptoFunctions{
     public static class AESEncryptFunction implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Param
-        VarCharHolder raw_key;
+        VarCharHolder rawKey;
 
         @Output
         VarCharHolder out;
@@ -252,21 +255,47 @@ public class CryptoFunctions{
         @Workspace
         String key;
 
-        public void setup() {
-            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_key.start, raw_key.end, raw_key.buffer);
-        }
+        @Workspace
+        SecretKeySpec secretKey;
 
+        @Workspace
+        byte[] keyByteArray;
+
+        @Workspace
+        Cipher cipher;
+
+        public void setup() {
+            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
+            java.security.MessageDigest sha = null;
+            try {
+                keyByteArray = key.getBytes("UTF-8");
+                sha = java.security.MessageDigest.getInstance("SHA-1");
+                keyByteArray = sha.digest(keyByteArray);
+                keyByteArray = java.util.Arrays.copyOf(keyByteArray, 16);
+                secretKey = new SecretKeySpec(keyByteArray, "AES");
+
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
+            String encryptedText = "";
+            try {
+                encryptedText = javax.xml.bind.DatatypeConverter.printBase64Binary(cipher.doFinal(input.getBytes("UTF-8")));
+            } catch ( Exception e ) {
 
-            String encrypted_text = org.apache.drill.exec.fn.impl.CryptoHelperFunctions.aes_encrypt( input, key );
+            }
 
             out.buffer = buffer;
             out.start = 0;
-            out.end = encrypted_text.getBytes().length;
-            buffer.setBytes(0, encrypted_text.getBytes());
+            out.end = encryptedText.getBytes().length;
+            buffer.setBytes(0, encryptedText.getBytes());
         }
 
     }
@@ -279,10 +308,10 @@ public class CryptoFunctions{
     public static class AESDecryptFunction implements DrillSimpleFunc {
 
         @Param
-        VarCharHolder raw_input;
+        VarCharHolder rawInput;
 
         @Param
-        VarCharHolder raw_key;
+        VarCharHolder rawKey;
 
         @Output
         VarCharHolder out;
@@ -293,22 +322,47 @@ public class CryptoFunctions{
         @Workspace
         String key;
 
-        @Override
-        public void setup() {
-            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_key.start, raw_key.end, raw_key.buffer);
-        }
+        @Workspace
+        SecretKeySpec secretKey;
 
+        @Workspace
+        byte[] keyByteArray;
+
+        @Workspace
+        Cipher cipher;
+
+        public void setup() {
+            key = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawKey.start, rawKey.end, rawKey.buffer);
+            java.security.MessageDigest sha = null;
+            try {
+                keyByteArray = key.getBytes("UTF-8");
+                sha = java.security.MessageDigest.getInstance("SHA-1");
+                keyByteArray = sha.digest(keyByteArray);
+                keyByteArray = java.util.Arrays.copyOf(keyByteArray, 16);
+                secretKey = new SecretKeySpec(keyByteArray, "AES");
+
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         @Override
         public void eval() {
 
-            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(raw_input.start, raw_input.end, raw_input.buffer);
+            String input = org.apache.drill.exec.expr.fn.impl.StringFunctionHelpers.toStringFromUTF8(rawInput.start, rawInput.end, rawInput.buffer);
+            String decryptedText = "";
+            try {
+                decryptedText = new String( cipher.doFinal(javax.xml.bind.DatatypeConverter.parseBase64Binary(input)));
+            } catch( Exception e){
 
-            String decrypted_text = org.apache.drill.exec.fn.impl.CryptoHelperFunctions.aes_decrypt( input, key );
+            }
 
             out.buffer = buffer;
             out.start = 0;
-            out.end = decrypted_text.getBytes().length;
-            buffer.setBytes(0, decrypted_text.getBytes());
+            out.end = decryptedText.getBytes().length;
+            buffer.setBytes(0, decryptedText.getBytes());
         }
 
     }

@@ -1,7 +1,5 @@
 # Drill Crypto Functions
 
-** NOTE:  This library is not done... More algorithms to come **
-
 This library contains a collection of cryptography-related functions for Apache Drill. It generally mirrors the crypto functions in MySQL.  The package includes:
 
 
@@ -24,6 +22,17 @@ This library contains a collection of cryptography-related functions for Apache 
 +---------------------------+-----------------+
 | JkcBUNAn8ByKWCcVmNrKMA==  | encrypted_text  |
 +---------------------------+-----------------+
+```
+
+* **`md2(<text>)`**:  Returns the md2 hash of the text. (https://en.wikipedia.org/wiki/MD2_(cryptography))
+Usage:
+```sql
+> select md2( 'testing' ) from (values(1));
++-----------------------------------+
+|              EXPR$0               |
++-----------------------------------+
+| fc134df10d6ecafceb5c75861d01b41f  |
++-----------------------------------+
 ```
 
 * **`md5(<text>)`**:  Returns the md5 hash of the text. (https://en.wikipedia.org/wiki/MD5)
@@ -60,3 +69,5 @@ Additionally, there are also `sha384(<text>)` and `sha512(<text>)` functions whi
 This collection of functions does not have any dependencies that are not already included in Drill.  You can build the functions from source by cloning this repository, navigating to the directory and typing: 
 `mvn clean package -DskipTests`.
 Once you've done that, you'll find two `.jar` files in the `target/` folder.  Copy both these files to `<drill path>/jars/3rdParty`.
+
+These functions will be included in Drill 1.11.
